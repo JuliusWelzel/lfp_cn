@@ -1,11 +1,12 @@
-# Git project template
-This repo serves as a template for projects <br>
+# Local Field Potentials from DBS surgery
+Spectral examination of Local Field Potentials from surgical data in Kiel using the [FOOOF toolbox](https://fooof-tools.github.io/fooof/)<br>
 
 ## Project description
-This project is a template which should be used for any new project maintained at GitHub. It contains the structure and READMEs which should be initialzed.<br>
+In this project we do some cool stuff for Christians master thesis<br>
 
 ## Author
-Developed by Julius Welzel (julius.welzel@uni-oldenburg.de) <br>
+Developed by Christian Neumann & Julius Welzel (julius.welzel@uni-oldenburg.de) <br>
+Supervised by Julian Kiel <br>
 
 ## Script structure
 * 00_general_info *(information about the project)*
@@ -13,7 +14,7 @@ Developed by Julius Welzel (julius.welzel@uni-oldenburg.de) <br>
 * 02_paperwork *(relevant paperwork for the project, e.g. ethics, ...)*
 * 03_experiment *(experimental scripts if available)*
 * 04_data *(contains raw data and derivatives, naming corresponds to 05_scripts)*
-  * *00_raw (not at Git)*  
+  * *00_raw (not at Git but in CAU cloud)*  
 * 05_scripts *(data analysis script projecting to 02_data)*
 * 06_plots *(plots derived from 03_scripts)*
 * 07_paper *(all paper relevant documents)*
