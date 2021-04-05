@@ -2,13 +2,23 @@
 This is a overview of analysis steps for a first overview
 
 ## Steps
-1. [ ] Convert lfp raw data to MatLab format
-  - Problem with conversion here. Only 1 seconds of data in MatLab after conversion <br>
-  ![](assets/pipeline-9a32a5d4.png)
-  - Example here from lt1d9290f0001_19-01-2021_11-25-05-224.mat <br>
-  ![](assets/pipeline-a6881821.png)
-2. [ ] Compute Spectral
+1. [x] Convert lfp raw data to MatLab format
+2. [x] Compute Spectral
+  - pilot LFP by Robin
 3. [ ] Fit FOOOF model
 
+# Analysis plan which follow MatLab scripts
+___
+**ana00_startup**
+1. Set envir
+
+**ana01_pilot_lfp**
+1. Find depth per participant
+2. Prep data and plot
+  - filter in freqbands
+  - DC-removal and detrend
+  - get frequency transform
+  - plot
+
 ## Versioning
-*Version 1.1// 11.11.2020*
+*Version 1.2 // 05.04.2020*
