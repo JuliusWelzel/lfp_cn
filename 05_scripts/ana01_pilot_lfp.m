@@ -24,51 +24,75 @@ DEPTH = extractBetween({list.name},'LT1','F'); % Depth is a cell array containin
 for d = 1:numel(DEPTH)
     
     % Daten einlesen
-    load([PATHIN_conv list(1).name]);
-    lfp = double(CLFP_01___Central)';
-
-    %Frequenz
-    srate   = CLFP_01___Central_KHz_Orig * 1000; % transform srate to sample/sec
-    p_raw   = plot(CLFP_01___Central);
-    n       = 4; % filter order, % needs rework, compare Wittmann ea., 2015
+    cfg = [];
+    cfg.dataset = [PATHIN_conv list(1).name];
+    data_lfp = ft_preprocessing(cfg);
     
-    %Filter (explorativ um die Frequenzbänder zu visualisieren)
-    passbands = [0 4;4 8;8 13;13 40;40 100];
-    [b,a] = butter(n , 2*passbands(1,2) * 2/srate , "low");
-    lfp(:,2) = filtfilt(b,a,lfp(:,1));
+    cfg.resamplefs = 1000; 
+    cfg.detrend = 'no'; 
+    data_resam = ft_resampledata(cfg,data_lfp)
 
-    for pb = 2:length(passbands);
-        
-        lfp(:,pb+1) = bandpass(lfp(:,1),passbands(pb,:)*2/srate);
-        
-    end
+    %hp filter
+    cfg = [];
+    cfg.hpfilter = 'yes';
+    cfg.hpfiltertype = 'fir';
+    cfg.hpfreq = 1;
+    data_select = ft_preprocessing(cfg,data_resam);
+
+    %lp-filter
+    cfg = [];
+    cfg.lpfilter = 'yes';
+    cfg.lpfiltertype = 'fir';
+    cfg.lpfreq = 100;
+    data_select = ft_preprocessing(cfg,data_select);
     
-    %Chronux params festlegen
-    params.Fs = srate ;  
-    params.tapers = [3 9];
-    params.fpass = [0 50];
-    params.err = [1 0.05];
-    movingwin =  [0.5 0.05];
-    maxDb = 15;
+    cfg = [];
+    cfg.dftfilter   = 'yes';
+    cfg.dftfreq     = [50]; %50hz line noise filter
+    data_select = ft_preprocessing(cfg,data_select);
+        
+    cfg1 = [];
+    cfg1.length  = 1;
+    cfg1.overlap = 0.5;
+    data_win05    = ft_redefinetrial(cfg1, data_select);
 
-    %Locdetrend und DC removal
-    f0 = 50;
-    lfp(:,1) = locdetrend(lfp(:,1),srate,movingwin);
-    lfp(:,1) = rmlinesc(lfp(:,1),params,f0);
+    cfg1.length  = 2;
+    cfg1.overlap = 0.5;    
+    data_win2    = ft_redefinetrial(cfg1, data_select);
 
-    %Frequenzspektrum
-    [S,f,Serr] = mtspectrumc(lfp(:,1),params);
-    plot(f,S,"Color","red")
-    hold on
-    plot(f,Serr,"Color","blue","LineStyle","-.")
-    xlim ([0 ,50])
-    xlabel("Frequenz in Hz")
-    hold off
+    cfg1.length  = 5;
+    cfg1.overlap = 0;    
+    data_win3    = ft_redefinetrial(cfg1, data_select);
 
-    %Spektrogramm Frequenz-Zeit
-    [s,t,f] = mtspecgramc(lfp(:,1),movingwin,params);
-    plot_matrix(s,t,f); xlabel([])
-    caxis([0 15])
-    colorbar
+    cfg2 = [];
+    cfg2.output  = 'pow';
+    cfg2.channel = 'all';
+    cfg2.method  = 'mtmfft';
+    cfg2.taper   = 'hanning';
+    cfg2.foi     = 0.5:1:80; % 1/cfg1.length  = 1;
+    base_freq1   = ft_freqanalysis(cfg2, data_win05);
+
+    cfg2.foi     = 0.5:0.5:80; % 1/cfg1.length  = 2;
+    base_freq2   = ft_freqanalysis(cfg2, data_win2);
+
+    cfg2.foi     = 0.5:0.2:80; % 1/cfg1.length  = 5;
+    base_freq3   = ft_freqanalysis(cfg2, data_win3);
+  
+    figure;
+    hold on;
+    plot(base_freq1.freq, base_freq1.powspctrm(1,:),'Color',color.con)
+    plot(base_freq2.freq, base_freq2.powspctrm(1,:),'Color',color.mod)
+    plot(base_freq3.freq, base_freq3.powspctrm(1,:),'Color',color.neu)
+
+    legend('1 sec // 0.5 s overlay','2 sec // 0.5 s overlay','5 sec // 0 s overlay')
+    xlabel('Frequency (Hz)');
+    ylabel('Absolute power (uV^2)'); 
+    
+    xlim([0 20])
+    
+    % store relevant info for future proecssing
+    % ID
+    % depth
+    % spectra
     
 end % depths
